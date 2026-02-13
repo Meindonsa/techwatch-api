@@ -2,7 +2,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Article from '#models/article'
 
 export default class ArticlesController {
-  // GET /api/articles - Liste tous les articles avec pagination
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
@@ -24,18 +23,15 @@ export default class ArticlesController {
     return response.json(articles)
   }
 
-  // GET /api/articles/:id - Détails d'un article
   async show({ params, response }: HttpContext) {
     const article = await Article.query().where('id', params.id).preload('source').firstOrFail()
 
-    // Incrémenter le compteur de vues
     article.viewsCount += 1
     await article.save()
 
     return response.json(article)
   }
 
-  // GET /api/articles/featured - Articles mis en avant
   async featured({ response }: HttpContext) {
     const articles = await Article.query()
       .where('is_featured', true)
@@ -46,7 +42,6 @@ export default class ArticlesController {
     return response.json(articles)
   }
 
-  // GET /api/articles/recent - Articles récents
   async recent({ response }: HttpContext) {
     const articles = await Article.query()
       .preload('source')
@@ -56,7 +51,6 @@ export default class ArticlesController {
     return response.json(articles)
   }
 
-  // POST /api/articles - Créer un article (utilisé par le scraper)
   async store({ request, response }: HttpContext) {
     const data = request.only([
       'sourceId',
@@ -71,7 +65,6 @@ export default class ArticlesController {
       'tags',
     ])
 
-    // Vérifier si l'article existe déjà (éviter les doublons)
     const existingArticle = await Article.findBy('url', data.url)
     if (existingArticle) {
       return response.conflict({ message: 'Article already exists' })
@@ -82,7 +75,6 @@ export default class ArticlesController {
     return response.created(article)
   }
 
-  // DELETE /api/articles/:id - Supprimer un article
   async destroy({ params, response }: HttpContext) {
     const article = await Article.findOrFail(params.id)
     await article.delete()

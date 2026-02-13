@@ -1,5 +1,6 @@
 // start/routes.ts
 import router from '@adonisjs/core/services/router'
+import SchedulerController from '#controllers/schedulers_controller'
 
 const SourcesController = () => import('#controllers/sources_controller')
 const ArticlesController = () => import('#controllers/articles_controller')
@@ -13,8 +14,10 @@ router
         router.post('/', [SourcesController, 'store'])
         router.get('/:id', [SourcesController, 'show'])
         router.put('/:id', [SourcesController, 'update'])
+        router.post('/detect', [SourcesController, 'detect'])
         router.delete('/:id', [SourcesController, 'destroy'])
-        router.get('/:id/articles', [SourcesController, 'articles'])
+        router.post('/:id/scan', [SourcesController, 'scan'])
+        router.post('/scan-all', [SourcesController, 'scanAll'])
       })
       .prefix('/sources')
 
@@ -29,5 +32,14 @@ router
         router.delete('/:id', [ArticlesController, 'destroy'])
       })
       .prefix('/articles')
+
+    router
+      .group(() => {
+        router.get('/status', [SchedulerController, 'status'])
+        router.post('/start', [SchedulerController, 'start'])
+        router.post('/stop', [SchedulerController, 'stop'])
+        router.post('/run-now', [SchedulerController, 'runNow'])
+      })
+      .prefix('/scheduler')
   })
   .prefix('/api')
