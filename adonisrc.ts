@@ -24,6 +24,7 @@ export default defineConfig({
     () => import('#start/routes'),
     () => import('#start/kernel'),
     () => import('./start/scheduler.js'),
+    () => import('#config/vine'),
   ],
 
   tests: {
