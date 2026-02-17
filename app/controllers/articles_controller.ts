@@ -1,21 +1,22 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Article from '#models/article'
+import { createArticleValidator, listArticlesValidator } from '#validators/article'
 
 export default class ArticlesController {
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
-    const sourceId = request.input('source_id')
-    const category = request.input('category')
+    const validated = await request.validateUsing(listArticlesValidator)
+
+    const page = validated.page || 1
+    const limit = validated.limit || 20
 
     const query = Article.query().preload('source').orderBy('published_at', 'desc')
 
-    if (sourceId) {
-      query.where('source_id', sourceId)
+    if (validated.source_id) {
+      query.where('source_id', validated.source_id)
     }
 
-    if (category) {
-      query.where('category', category)
+    if (validated.category) {
+      query.where('category', validated.category)
     }
 
     const articles = await query.paginate(page, limit)
@@ -51,32 +52,28 @@ export default class ArticlesController {
     return response.json(articles)
   }
 
+  /**
+   * POST /api/articles
+   * Create an article
+   */
   async store({ request, response }: HttpContext) {
-    const data = request.only([
-      'sourceId',
-      'title',
-      'description',
-      'content',
-      'url',
-      'imageUrl',
-      'author',
-      'publishedAt',
-      'category',
-      'tags',
-    ])
+    const data: any = await request.validateUsing(createArticleValidator)
 
-    const existingArticle = await Article.findBy('url', data.url)
+    const existingArticle: Article | null = await Article.findBy('url', data.url)
     if (existingArticle) {
-      return response.conflict({ message: 'Article already exists' })
+      return response.conflict({
+        message: 'Article already exists',
+        article: existingArticle,
+      })
     }
 
-    const article = await Article.create(data)
+    const article: Article = await Article.create(data)
 
     return response.created(article)
   }
 
   async destroy({ params, response }: HttpContext) {
-    const article = await Article.findOrFail(params.id)
+    const article: Article = await Article.findOrFail(params.id)
     await article.delete()
 
     return response.noContent()

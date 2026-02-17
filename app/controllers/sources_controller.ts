@@ -3,6 +3,11 @@ import Source from '#models/source'
 import SourceDetectionService from '#services/source_detection_service'
 import RssScannerService from '#services/rss_scanner_service'
 import WebScraperService from '#services/web_scraper_service'
+import {
+  createSourceValidator,
+  detectSourceValidator,
+  updateSourceValidator,
+} from '#validators/source'
 
 export default class SourcesController {
   private rssScanner = new RssScannerService()
@@ -37,12 +42,12 @@ export default class SourcesController {
   }
 
   async store({ request, response }: HttpContext) {
-    const { name, url } = request.only(['name', 'url'])
-    const detection = await this.detectionService.detectSource(url)
+    const data = await request.validateUsing(createSourceValidator)
+    const detection = await this.detectionService.detectSource(data.url)
 
     const source = await Source.create({
-      name,
-      url,
+      name: data.name,
+      url: data.url,
       type: detection.type,
       rssFeedUrl: detection.feedUrl,
       isActive: true,
@@ -59,10 +64,8 @@ export default class SourcesController {
   }
 
   async detect({ request, response }: HttpContext) {
-    const { url } = request.only(['url'])
-    if (!url) return response.badRequest({ message: 'URL required' })
-
-    const detection = await this.detectionService.detectSource(url)
+    const data = await request.validateUsing(detectSourceValidator)
+    const detection = await this.detectionService.detectSource(data.url)
     return response.json(detection)
   }
 
@@ -81,20 +84,13 @@ export default class SourcesController {
     return response.json(source)
   }
 
+  /**
+   * PUT /api/sources/:id
+   * Mettre à jour une source
+   */
   async update({ params, request, response }: HttpContext) {
+    const data = await request.validateUsing(updateSourceValidator)
     const source = await Source.findOrFail(params.id)
-
-    const data = request.only([
-      'name',
-      'url',
-      'logoUrl',
-      'type',
-      'rssFeedUrl',
-      'scrapingConfig',
-      'scanFrequency',
-      'isActive',
-    ])
-
     source.merge(data)
     await source.save()
     return response.json(source)
