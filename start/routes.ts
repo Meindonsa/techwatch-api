@@ -1,10 +1,10 @@
 // start/routes.ts
 import router from '@adonisjs/core/services/router'
+import { middleware } from '#start/kernel'
 
 const SchedulerController = () => import('#controllers/schedulers_controller')
 const SourcesController = () => import('#controllers/sources_controller')
 const ArticlesController = () => import('#controllers/articles_controller')
-const ApiKeyMiddleware = () => import('#middleware/ApiKeyMiddleware')
 
 router
   .group(() => {
@@ -44,4 +44,4 @@ router
       .prefix('/scheduler')
   })
   .prefix('/api')
-  .use(ApiKeyMiddleware)
+  .middleware([middleware.apiKey])
