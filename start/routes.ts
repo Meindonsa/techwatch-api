@@ -43,5 +43,5 @@ router
       })
       .prefix('/scheduler')
   })
-  .prefix('/api')
-  .middleware([middleware.apiKey])
+  .prefix('/service-layer')
+  .use(middleware.simpleApiAuth())
