@@ -39,5 +39,5 @@ router.use([() => import('@adonisjs/core/bodyparser_middleware')])
  * the routes or the routes group.
  */
 export const middleware = router.named({
-  apiKey: () => import('#middleware/ApiKeyMiddleware'),
+  simpleApiAuth: () => import('#middleware/simple_api_auth_middleware'),
 })
