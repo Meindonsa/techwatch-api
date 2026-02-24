@@ -45,3 +45,9 @@ router
   })
   .prefix('/service-layer')
   .use(middleware.simpleApiAuth())
+  .use(
+    middleware.throttle({
+      requests: 100,
+      duration: '1 min',
+    })
+  )

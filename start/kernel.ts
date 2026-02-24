@@ -40,4 +40,5 @@ router.use([() => import('@adonisjs/core/bodyparser_middleware')])
  */
 export const middleware = router.named({
   simpleApiAuth: () => import('#middleware/simple_api_auth_middleware'),
+  throttle: () => import('#middleware/throttle_middleware'),
 })
