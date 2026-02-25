@@ -70,7 +70,7 @@ export default class SourcesController {
   }
 
   async index({ response }: HttpContext) {
-    const sources = await Source.query().orderBy('created_at', 'desc')
+    const sources = await Source.query().orderBy('created_at', 'desc').limit(20)
     return response.json(sources)
   }
 

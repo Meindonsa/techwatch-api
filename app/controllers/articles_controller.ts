@@ -12,11 +12,11 @@ export default class ArticlesController {
     const query = Article.query().preload('source').orderBy('published_at', 'desc')
 
     if (validated.source_id) {
-      query.where('source_id', validated.source_id)
+      query.where('source_id', validated.source_id).limit(20)
     }
 
     if (validated.category) {
-      query.where('category', validated.category)
+      query.where('category', validated.category).limit(20)
     }
 
     const articles = await query.paginate(page, limit)
