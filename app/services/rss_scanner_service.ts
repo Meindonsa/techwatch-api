@@ -22,9 +22,6 @@ export default class RssScannerService {
     })
   }
 
-  /**
-   * Scanne une source RSS et crée/met à jour les articles
-   */
   async scanSource(sourceId: number): Promise<{
     success: boolean
     articlesCreated: number
@@ -111,9 +108,6 @@ export default class RssScannerService {
     return result
   }
 
-  /**
-   * Scanne toutes les sources RSS actives
-   */
   async scanAllSources(): Promise<{
     totalScanned: number
     totalCreated: number
@@ -138,7 +132,6 @@ export default class RssScannerService {
       summary.totalUpdated += result.articlesUpdated
       summary.errors.push(...result.errors)
 
-      // Pause entre chaque source pour éviter de surcharger
       await this.sleep(2000)
     }
 
@@ -149,11 +142,7 @@ export default class RssScannerService {
     return summary
   }
 
-  /**
-   * Extrait les données d'un item RSS pour créer un article
-   */
   private extractArticleData(item: any, sourceId: number) {
-    // Extraction de l'image
     let imageUrl = null
     if (item.enclosure?.url) {
       imageUrl = item.enclosure.url
@@ -163,7 +152,6 @@ export default class RssScannerService {
       imageUrl = item['media:thumbnail'].$.url
     }
 
-    // Extraction du contenu
     let content = null
     if (item.contentEncoded) {
       content = this.stripHtml(item.contentEncoded)
@@ -171,7 +159,6 @@ export default class RssScannerService {
       content = this.stripHtml(item.content)
     }
 
-    // Description
     let description = null
     if (item.description) {
       description = this.stripHtml(item.description)
@@ -179,7 +166,6 @@ export default class RssScannerService {
       description = this.stripHtml(item.summary)
     }
 
-    // Date de publication
     let publishedAt = null
     if (item.pubDate) {
       publishedAt = DateTime.fromJSDate(new Date(item.pubDate))
@@ -187,7 +173,6 @@ export default class RssScannerService {
       publishedAt = DateTime.fromISO(item.isoDate)
     }
 
-    // Catégories/Tags
     let category = null
     let tags: string[] | null = null
     if (item.categories && item.categories.length > 0) {
@@ -197,36 +182,35 @@ export default class RssScannerService {
 
     return {
       sourceId,
-      title: item.title || 'Sans titre',
+      title: this.sanitizeText(item.title) || 'Sans titre',
       description: description ? description.substring(0, 500) : null,
       content: content ? content.substring(0, 5000) : null,
       url: item.link,
       imageUrl,
-      author: item.creator || item.author || null,
+      author: this.sanitizeText(item.creator || item.author || null),
       publishedAt,
       category,
       tags,
     }
   }
 
-  /**
-   * Nettoie le HTML et extrait le texte
-   */
   private stripHtml(html: string): string {
     return html
-      .replace(/<[^>]*>/g, '') // Enlever les balises HTML
+      .replace(/<[^>]*>/g, '')
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
-      .replace(/\s+/g, ' ') // Normaliser les espaces
+      .replace(/\s+/g, ' ')
       .trim()
   }
 
-  /**
-   * Pause utility
-   */
+  private sanitizeText(text: string | null): string | null {
+    if (!text) return null
+    return this.stripHtml(text)
+  }
+
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms))
   }
