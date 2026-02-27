@@ -1,17 +1,18 @@
 {
   "name": "techwatch-js",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "license": "UNLICENSED",
   "scripts": {
     "start": "node bin/server.js",
-    "build": "node ace build",
+    "build": "node ace build && npm run cp-vercel",
     "dev": "node ace serve --hmr",
     "test": "node ace test",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cp-vercel": "cp vercel-index.js ./build/index.js"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",
