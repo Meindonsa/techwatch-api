@@ -1,4 +1,5 @@
 import Parser from 'rss-parser'
+import {FeedError} from "../utils/errors.js";
 
 type CustomItem = {
     title: string
@@ -41,18 +42,31 @@ function extractImage(item: CustomItem): string | null {
 }
 
 export async function getArticles(feedUrl: string): Promise<FeedResult> {
-    const feed = await rssParser.parseURL(feedUrl)
+    try {
+        const feed = await rssParser.parseURL(feedUrl)
 
-    return {
-        feedUrl,
-        title: feed.title ?? 'Sans titre',
-        articles: feed.items.map((item) => ({
-            title: item.title ?? 'Sans titre',
-            link: item.link ?? '',
-            date: item.pubDate ?? null,
-            summary: item.contentSnippet ?? null,
-            author: item.creator ?? null,
-            image: extractImage(item),
-        })),
+        return {
+            feedUrl,
+            title: feed.title ?? 'Sans titre',
+            articles: feed.items.map((item) => ({
+                title: item.title ?? 'Sans titre',
+                link: item.link ?? '',
+                date: item.pubDate ?? null,
+                summary: item.contentSnippet ?? null,
+                author: item.creator ?? null,
+                image: extractImage(item),
+            })),
+        }
+    }catch (e: any) {
+        if (e.code === 'ETIMEDOUT' || e.message?.includes('timeout')) {
+            throw new FeedError('TIMEOUT', 'Le site a mis trop de temps à répondre')
+        }
+        if (e.code === 'ENOTFOUND' || e.code === 'ECONNREFUSED') {
+            throw new FeedError('UNREACHABLE', 'Site inaccessible ou inexistant')
+        }
+        if (e.message?.includes('Status code')) {
+            throw new FeedError('NOT_FOUND', 'Aucun flux trouvé à cette URL')
+        }
+        throw new FeedError('PARSE_ERROR', 'Impossible de lire le contenu du flux')
     }
 }

@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import {getArticles} from "../services/article.service.js";
 import {urlArraySchema} from "../validators/feed.validator.js";
+import {FeedError} from "../utils/errors.js";
 
 const articlesRoute = new Hono()
 
@@ -21,7 +22,12 @@ articlesRoute.post('/', async (c) => {
         if (result.status === 'fulfilled') {
             success.push(result.value)
         } else {
-            failed.push({ feedUrl: parsed.data[i], error: 'Flux inaccessible ou invalide' })
+            const err = result.reason
+            failed.push({
+                feedUrl: parsed.data[i],
+                error: err instanceof FeedError ? err.message : 'Erreur inattendue',
+                code:  err instanceof FeedError ? err.code   : 'UNKNOWN',
+            })
         }
     }
 
