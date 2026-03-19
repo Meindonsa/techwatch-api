@@ -18,4 +18,4 @@ export const urlSchema = z
 export const urlArraySchema = z
     .array(urlSchema, { error: 'Un tableau d\'URLs est requis' })
     .min(1, 'Le tableau ne peut pas être vide')
-    .max(20, 'Maximum 20 URLs par requête')
+    .max(10, 'Maximum 20 URLs par requête')
