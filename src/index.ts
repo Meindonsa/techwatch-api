@@ -6,17 +6,25 @@ import articleRoute from "./routes/article.route.js";
 import articlesRoute from "./routes/articles.route.js";
 import {authMiddleware} from "./middlewares/auth.middleware.js";
 import {rateLimitMiddleware} from "./middlewares/rate-limit.middleware.js";
+import {swaggerUI} from "@hono/swagger-ui";
+import {openApiDoc} from "./openapi.js";
 
 const app = new Hono()
 
 //app.use('*', ssrfMiddleware)
-app.use('*', authMiddleware)
+app.use('/detect/*', authMiddleware)
+app.use('/article/*', authMiddleware)
+app.use('/articles/*', authMiddleware)
 app.use('*', rateLimitMiddleware)
 
 app.route('/detect', detectRoute)
 app.route('/article', articleRoute)
 app.route('/articles', articlesRoute)
 
+app.get('/doc', (c) => c.json(openApiDoc))
+app.get('/ui', swaggerUI({ url: '/doc' }))
+
 serve({ fetch: app.fetch, port: 3000},() => {
-  console.log(`Server is running on http://localhost:3000`)
+  console.log('Server running on http://localhost:3000')
+  console.log('Swagger UI → http://localhost:3000/ui')
 })
