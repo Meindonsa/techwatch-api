@@ -5,10 +5,13 @@ import detectRoute from "./routes/detection.route.js";
 import articleRoute from "./routes/article.route.js";
 import articlesRoute from "./routes/articles.route.js";
 import {authMiddleware} from "./middlewares/auth.middleware.js";
+import {rateLimitMiddleware} from "./middlewares/rate-limit.middleware.js";
 
 const app = new Hono()
 
+//app.use('*', ssrfMiddleware)
 app.use('*', authMiddleware)
+app.use('*', rateLimitMiddleware)
 
 app.route('/detect', detectRoute)
 app.route('/article', articleRoute)
