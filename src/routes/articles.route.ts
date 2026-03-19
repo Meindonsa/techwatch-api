@@ -1,18 +1,17 @@
 import { Hono } from 'hono'
 import {getArticles} from "../services/article.service.js";
+import {urlArraySchema} from "../validators/feed.validator.js";
 
 const articlesRoute = new Hono()
 
 articlesRoute.post('/', async (c) => {
     const body = await c.req.json()
-    const { feedUrls } = body
+    const parsed = urlArraySchema.safeParse(body)
 
-    if (!Array.isArray(feedUrls) || feedUrls.length === 0) {
-        return c.json({ error: 'Champ "feedUrls" requis (tableau non vide)' }, 400)
-    }
+    if (!parsed.success)
+        return c.json({ error: parsed.error.issues[0].message }, 400)
 
-    // Promise.allSettled — les erreurs n'arrêtent pas les autres
-    const results = await Promise.allSettled(feedUrls.map(getArticles))
+    const results = await Promise.allSettled(parsed.data.map(getArticles))
 
     const success = []
     const failed = []
@@ -22,7 +21,7 @@ articlesRoute.post('/', async (c) => {
         if (result.status === 'fulfilled') {
             success.push(result.value)
         } else {
-            failed.push({ feedUrl: feedUrls[i], error: 'Flux inaccessible ou invalide' })
+            failed.push({ feedUrl: parsed.data[i], error: 'Flux inaccessible ou invalide' })
         }
     }
 

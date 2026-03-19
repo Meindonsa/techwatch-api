@@ -1,19 +1,22 @@
 import {Hono} from 'hono'
 import {getArticles} from "../services/article.service.js";
+import {urlSchema} from "../validators/feed.validator.js";
 
 const articleRoute = new Hono()
 
 articleRoute.post('/', async (c) => {
-    const feedUrl = await c.req.json()
+    const body = await c.req.json()
+    const parsed = urlSchema.safeParse(body)
 
-    if (!feedUrl || typeof feedUrl !== 'string')
-        return c.json({ error: 'Le body doit être une URL de flux (string)' }, 400)
+    if (!parsed.success) {
+        return c.json({ error: parsed.error.issues[0].message }, 400)
+    }
 
     try {
-        const result = await getArticles(feedUrl)
+        const result = await getArticles(parsed.data)
         return c.json(result)
     } catch (e) {
-        return c.json({error: 'Impossible de lire ce flux', feedUrl}, 422)
+        return c.json({error: 'Impossible de lire ce flux', feedUrl: parsed.data}, 422)
     }
 })
 
