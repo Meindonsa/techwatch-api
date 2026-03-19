@@ -213,3 +213,9 @@ curl -X POST http://localhost:3000/articles \
 ## Contributors
 
 - **Meindonsa** — [@Meindonsa](https://github.com/Meindonsa)
+
+---
+
+## License
+
+This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
