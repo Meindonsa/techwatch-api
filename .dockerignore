@@ -1,0 +1,10 @@
+.idea
+.vscode
+.lh
+.history
+.run
+node_modules
+dist
+.env
+*.log
+coverage
