@@ -4,12 +4,10 @@ import {detectSource} from "../services/detection.service.js";
 const detectRoute = new Hono()
 
 detectRoute.post('/', async (c) => {
-    const body = await c.req.json()
-    const { url } = body
+    const url = await c.req.json()
 
-    if (!url || typeof url !== 'string') {
-        return c.json({ error: 'Champ "url" requis' }, 400)
-    }
+    if (!url || typeof url !== 'string')
+        return c.json({ error: 'Le body doit être une URL (string)' }, 400)
 
     const result = await detectSource(url)
 

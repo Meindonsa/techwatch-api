@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.11",
+    "dotenv": "^17.3.1",
     "hono": "^4.12.8",
     "node-html-parser": "^7.1.0",
     "rss-parser": "^3.13.0"

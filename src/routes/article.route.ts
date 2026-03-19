@@ -4,12 +4,10 @@ import {getArticles} from "../services/article.service.js";
 const articleRoute = new Hono()
 
 articleRoute.post('/', async (c) => {
-    const body = await c.req.json()
-    const {feedUrl} = body
+    const feedUrl = await c.req.json()
 
     if (!feedUrl || typeof feedUrl !== 'string')
-        return c.json({error: 'Champ "feedUrl" requis'}, 400)
-
+        return c.json({ error: 'Le body doit être une URL de flux (string)' }, 400)
 
     try {
         const result = await getArticles(feedUrl)
