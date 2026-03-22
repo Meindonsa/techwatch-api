@@ -8,8 +8,10 @@ import {authMiddleware} from "./middlewares/auth.middleware.js";
 import {rateLimitMiddleware} from "./middlewares/rate-limit.middleware.js";
 import {swaggerUI} from "@hono/swagger-ui";
 import {openApiDoc} from "./openapi.js";
+import { cors } from "hono/cors";
 
 const app = new Hono()
+app.use('*', cors())
 
 //app.use('*', ssrfMiddleware)
 app.use('/detect/*', authMiddleware)
