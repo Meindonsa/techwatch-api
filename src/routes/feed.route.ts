@@ -3,8 +3,7 @@ import {upsertFeed, getFeedById, deleteFeed} from '../repositories/feed.reposito
 import {
     subscribeUserToFeed,
     unsubscribeUserFromFeed,
-    getFeedsByUser,
-    checkSubscription
+    getFeedsByUser
 } from '../repositories/user-feed.repository.js'
 import { insertArticles } from '../repositories/article.repository.js'
 import { getArticles } from '../services/article.service.js'
@@ -15,7 +14,7 @@ import {createFeed, nameSchema} from "../validators/feed.validator.js";
 
 const feedRoute = new Hono()
 
-// POST /feeds/:userId — créer un feed et abonner l'utilisateur ✅
+// POST /feeds/:userId
 feedRoute.post('/:userId', async (c) => {
     const userId = Number(c.req.param('userId'))
     const body = await c.req.json()
@@ -66,7 +65,7 @@ feedRoute.post('/:userId', async (c) => {
     }
 })
 
-// DELETE /feeds/:feedId/users/:username — désabonner un user d'un feed ❌
+// DELETE /feeds/:feedId/users/:username ✅
 feedRoute.delete('/:feedId/users/:username', (c) => {
     const feedId: number = Number(c.req.param('feedId'))
     const username: string = String(c.req.param('username'))
@@ -77,9 +76,6 @@ feedRoute.delete('/:feedId/users/:username', (c) => {
 
     const feed = getFeedById(feedId)
     if (!feed) return c.json({ error: FeedErrors.FEED_NOT_FOUND.message }, 404)
-
-    if(!checkSubscription(user.id, feedId))
-        return c.json({ error: FeedErrors.SUBSCRIBE_NOT_FOUND.message }, 404)
 
     unsubscribeUserFromFeed(user.id, feedId)
     return c.json({ message: FeedErrors.UNSUBSCRIBE_SUCCESS.message })
