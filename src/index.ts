@@ -9,7 +9,9 @@ import {rateLimitMiddleware} from "./middlewares/rate-limit.middleware.js";
 import {swaggerUI} from "@hono/swagger-ui";
 import {openApiDoc} from "./openapi.js";
 import { cors } from "hono/cors";
+import {runMigrations} from "./db/index.js";
 
+runMigrations()
 const app = new Hono()
 app.use('*', cors())
 
