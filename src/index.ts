@@ -12,8 +12,12 @@ import { cors } from "hono/cors";
 import {runMigrations} from "./db/index.js";
 import userRoute from "./routes/user.route.js";
 import feedRoute from "./routes/feed.route.js";
+import {startCron} from "./services/cron.service.js";
 
 runMigrations()
+// Démarrage du cron de scraping
+startCron()
+
 const app = new Hono()
 app.use('*', cors())
 
