@@ -15,7 +15,22 @@ export const urlSchema = z
     .min(3, 'URL trop courte')
     .refine(isValidUrl, { message: 'URL invalide — ex: dev.to ou https://dev.to/feed' })
 
+export const createFeed = z.object({
+    url: urlSchema,
+    name: z.string().min(1, 'Le nom est requis'),
+})
+
+export const nameSchema = z.object({
+    name: z.string().min(1, 'Le nom est requis'),
+})
+
 export const urlArraySchema = z
     .array(urlSchema, { error: 'Un tableau d\'URLs est requis' })
     .min(1, 'Le tableau ne peut pas être vide')
     .max(10, 'Maximum 20 URLs par requête')
+
+
+export const createUserSchema = z.object({
+    username: z.string().min(1, 'Le pseudo est requis'),
+    password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
+})

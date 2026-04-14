@@ -10,6 +10,8 @@ import {swaggerUI} from "@hono/swagger-ui";
 import {openApiDoc} from "./openapi.js";
 import { cors } from "hono/cors";
 import {runMigrations} from "./db/index.js";
+import userRoute from "./routes/user.route.js";
+import feedRoute from "./routes/feed.route.js";
 
 runMigrations()
 const app = new Hono()
@@ -19,11 +21,15 @@ app.use('*', cors())
 app.use('/detect/*', authMiddleware)
 app.use('/article/*', authMiddleware)
 app.use('/articles/*', authMiddleware)
+app.use('/users/*', authMiddleware)
+app.use('/feeds/*', authMiddleware)
 app.use('*', rateLimitMiddleware)
 
 app.route('/detect', detectRoute)
 app.route('/article', articleRoute)
 app.route('/articles', articlesRoute)
+app.route('/users', userRoute)
+app.route('/feeds', feedRoute)
 
 app.get('/doc', (c) => c.json(openApiDoc))
 app.get('/ui', swaggerUI({ url: '/doc' }))
