@@ -1,6 +1,6 @@
 export class FeedError extends Error {
     constructor(
-        public code: 'TIMEOUT' | 'NOT_FOUND' | 'INVALID_URL' | 'PARSE_ERROR' | 'UNREACHABLE',
+        public code: 'TIMEOUT' | 'NOT_FOUND' | 'INVALID_URL' | 'PARSE_ERROR' | 'UNREACHABLE' | 'USER_NOT_FOUND' | 'SUCCESS',
         message: string
     ) {
         super(message)
@@ -14,4 +14,8 @@ export const FeedErrors = {
     INVALID_URL: new FeedError('INVALID_URL', 'URL invalide ou inaccessible'),
     PARSE_ERROR: new FeedError('PARSE_ERROR', 'Impossible de lire le contenu du flux'),
     UNREACHABLE: new FeedError('UNREACHABLE', 'Site inaccessible ou inexistant'),
+    USER_NOT_FOUND: new FeedError('NOT_FOUND', 'Utilisateur introuvable'),
+    FEED_NOT_FOUND: new FeedError('NOT_FOUND', 'Feed introuvable'),
+    SUBSCRIBE_NOT_FOUND: new FeedError('NOT_FOUND', 'Souscription introuvable'),
+    UNSUBSCRIBE_SUCCESS: new FeedError('SUCCESS', 'Désabonnement effectué'),
 }

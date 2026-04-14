@@ -27,6 +27,11 @@ export function unsubscribeUserFromFeed(userId: number, feedId: number): void {
     db.prepare(`DELETE FROM user_feeds WHERE user_id = ? AND feed_id = ?`).run(userId, feedId)
 }
 
+export function checkSubscription(userId: number, feedId: number): boolean{
+    const subscription = db.prepare(`SELECT * FROM user_feeds WHERE user_id = ? AND feed_id = ?`).run(userId, feedId);
+    return !!subscription;
+}
+
 export function getFeedsByUser(userId: number): Feed[] {
     return db.prepare(`
     SELECT f.* FROM feeds f
