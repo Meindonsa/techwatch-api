@@ -13,12 +13,17 @@ import {runMigrations} from "./db/index.js";
 import userRoute from "./routes/user.route.js";
 import feedRoute from "./routes/feed.route.js";
 import {startCron} from "./services/cron.service.js";
+import {createNodeWebSocket} from "@hono/node-ws";
+import {getUserById, getUserByUsername} from "./repositories/user.repository.js";
+import {registerConnection, removeConnection} from "./services/ws.service.js";
 
 runMigrations()
 // Démarrage du cron de scraping
 startCron()
 
 const app = new Hono()
+const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app })
+
 app.use('*', cors())
 
 //app.use('*', ssrfMiddleware)
@@ -35,10 +40,37 @@ app.route('/articles', articlesRoute)
 app.route('/users', userRoute)
 app.route('/feeds', feedRoute)
 
+app.get('/ws/:username', upgradeWebSocket((c) => {
+  const username: string = c.req.param('username') || "";
+
+  return {
+    onOpen(_, ws) {
+      if(!username || username.trim().length ==0) return;
+      const user = getUserByUsername(username)
+      if (!user) {
+        ws.close(1008, 'Utilisateur introuvable')
+        return
+      }
+      registerConnection(username, ws)
+      ws.send(JSON.stringify({ type: 'connected', username }))
+    },
+    onClose() {
+      removeConnection(username)
+    },
+    onError(error) {
+      console.error(`[ws] Erreur @${username}`, error)
+      removeConnection(username)
+    },
+  }
+}))
+
 app.get('/doc', (c) => c.json(openApiDoc))
 app.get('/ui', swaggerUI({ url: '/doc' }))
 
-serve({ fetch: app.fetch, port: 3000},() => {
+const server = serve({ fetch: app.fetch, port: 3000},() => {
   console.log('Server running on http://localhost:3000')
   console.log('Swagger UI → http://localhost:3000/ui')
+  console.log('WebSocket  → ws://localhost:3000/ws/:userId')
 })
+
+injectWebSocket(server);
