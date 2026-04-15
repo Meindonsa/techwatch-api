@@ -16,6 +16,7 @@ import {startCron} from "./services/cron.service.js";
 import {createNodeWebSocket} from "@hono/node-ws";
 import {getUserById, getUserByUsername} from "./repositories/user.repository.js";
 import {registerConnection, removeConnection} from "./services/ws.service.js";
+import authRoute from "./routes/auth.route.js";
 
 runMigrations()
 // Démarrage du cron de scraping
@@ -34,6 +35,7 @@ app.use('/users/*', authMiddleware)
 app.use('/feeds/*', authMiddleware)
 app.use('*', rateLimitMiddleware)
 
+app.route('/auth', authRoute)
 app.route('/detect', detectRoute)
 app.route('/article', articleRoute)
 app.route('/articles', articlesRoute)

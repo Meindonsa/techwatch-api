@@ -4,7 +4,7 @@ import { getArticles } from './article.service.js'
 import { notifyUpdatedFeeds } from './ws.service.js'
 import { FeedError } from '../utils/errors.js'
 
-const CRON_INTERVAL = Number(1 * 60 * 1000)
+const CRON_INTERVAL =Number(process.env.CRON_INTERVAL_MS ?? 15 * 60 * 1000)
 
 /**
  * Scrappe tous les feeds en DB et insère les nouveaux articles.
