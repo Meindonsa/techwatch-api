@@ -1,9 +1,10 @@
 import { getAllFeeds } from '../repositories/feed.repository.js'
 import { insertArticles } from '../repositories/article.repository.js'
 import { getArticles } from './article.service.js'
+import { notifyUpdatedFeeds } from './ws.service.js'
 import { FeedError } from '../utils/errors.js'
 
-const CRON_INTERVAL = Number(process.env.CRON_INTERVAL_MS ?? 15 * 60 * 1000)
+const CRON_INTERVAL = Number(1 * 60 * 1000)
 
 /**
  * Scrappe tous les feeds en DB et insère les nouveaux articles.
@@ -50,14 +51,15 @@ export async function scrapeAllFeeds(): Promise<number[]> {
 let cronHandle: ReturnType<typeof setInterval> | null = null
 
 export function startCron(): void {
-    if (cronHandle) return
+    if (cronHandle) return;
 
     console.log(`[cron] Démarrage — intervalle : ${CRON_INTERVAL / 1000}s`)
 
     scrapeAllFeeds()
 
-    cronHandle = setInterval(() => {
-        scrapeAllFeeds()
+    cronHandle = setInterval(async () => {
+        const updatedFeedIds = await scrapeAllFeeds()
+        notifyUpdatedFeeds(updatedFeedIds)
     }, CRON_INTERVAL)
 }
 
