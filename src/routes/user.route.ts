@@ -6,26 +6,6 @@ import {createUserSchema} from "../validators/feed.validator.js";
 
 const userRoute = new Hono()
 
-// POST /users ✅
-userRoute.post('/', async (c) => {
-    const body = await c.req.json()
-    const parsed = createUserSchema.safeParse(body)
-
-    if (!parsed.success)
-        return c.json({ error: parsed.error.issues[0].message }, 400)
-
-
-    try {
-        const user = await createUser(parsed.data.username, parsed.data.password)
-        const { password: _, ...safeUser } = user
-        return c.json(safeUser, 201)
-    } catch (e: any) {
-        if (e.message?.includes('UNIQUE'))
-            return c.json({ error: 'Ce pseudo est déjà pris' }, 409)
-        return c.json({ error: 'Erreur inattendue' }, 500)
-    }
-})
-
 // GET /users/check-username?username=xxx ✅
 userRoute.get('/check-username', (c) => {
     const username = c.req.query('username')
