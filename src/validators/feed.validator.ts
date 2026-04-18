@@ -17,7 +17,6 @@ export const urlSchema = z
 
 export const createFeed = z.object({
     url: urlSchema,
-    name: z.string().min(1, 'Le nom est requis'),
 })
 
 export const nameSchema = z.object({

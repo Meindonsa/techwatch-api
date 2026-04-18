@@ -15,8 +15,8 @@ import {createFeed, nameSchema} from "../validators/feed.validator.js";
 const feedRoute = new Hono()
 
 // POST /feeds/:userId
-feedRoute.post('/:userId', async (c) => {
-    const userId = Number(c.req.param('userId'))
+feedRoute.post('/:username', async (c) => {
+    const username: string = c.req.param('username');
     const body = await c.req.json()
     const parsed = createFeed.safeParse(body)
 
@@ -24,7 +24,7 @@ feedRoute.post('/:userId', async (c) => {
         return c.json({ error: parsed.error.issues[0].message }, 400)
     }
 
-    const user = getUserById(userId)
+    const user = getUserByUsername(username)
     if (!user) return c.json({ error: 'Utilisateur introuvable' }, 404)
 
     // 1. Détecter l'URL du feed RSS à partir de l'URL du site
@@ -43,7 +43,7 @@ feedRoute.post('/:userId', async (c) => {
             name: feedData.title,
         })
 
-        const subscription = subscribeUserToFeed(userId, feed.id)
+        const subscription = subscribeUserToFeed(user.id, feed.id)
 
         const inserted = insertArticles(feedData.articles.map((a) => ({
             feed_id: feed.id,
