@@ -62,3 +62,13 @@ export function getArticlesByUser(userId: number, limit = 100): Article[] {
         LIMIT ?
     `).all(userId, limit) as Article[]
 }
+
+export function getArticlesByUserAndFeed(userId: number, feedId:number, limit = 100): Article[] {
+    return db.prepare(`
+        SELECT a.* FROM articles a
+                            INNER JOIN user_feeds uf ON uf.feed_id = a.feed_id
+        WHERE uf.user_id = ? AND uf.feed_id = ?
+        ORDER BY a.pub_date DESC
+        LIMIT ?
+    `).all(userId, feedId, limit) as Article[]
+}
